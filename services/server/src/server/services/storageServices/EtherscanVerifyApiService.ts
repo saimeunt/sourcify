@@ -9,6 +9,7 @@ import { WStorageIdentifiers } from "./identifiers";
 import { Database } from "../utils/Database";
 import { SourcifyDatabaseService } from "./SourcifyDatabaseService";
 import { ExternalVerification } from "../utils/database-util";
+import { VerificationParameters } from "../../types";
 
 export type EtherscanVerifyApiIdentifiers =
   | WStorageIdentifiers.EtherscanVerify
@@ -312,6 +313,7 @@ export class EtherscanVerifyApiService implements WStorageService {
 
   async storeVerification(
     verification: VerificationExport,
+    verificationParameters: VerificationParameters,
     jobData?: {
       verificationId: string;
       finishTime: Date;
