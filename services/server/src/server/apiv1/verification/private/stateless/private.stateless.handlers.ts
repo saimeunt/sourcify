@@ -294,7 +294,10 @@ export async function replaceContract(
 
     try {
       const verificationExport = verification.export();
-      await customReplaceMethod(sourcifyDatabaseService, verificationExport);
+      await customReplaceMethod(sourcifyDatabaseService, verificationExport, {
+        privateVerification: false,
+        verifiedBy: null,
+      });
     } catch (error: any) {
       logger.error("Error replacing contract", {
         error: error,

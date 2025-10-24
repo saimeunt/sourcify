@@ -12,6 +12,7 @@ import { Services } from "../../services/services";
 import { StatusCodes } from "http-status-codes";
 import { fetchFromEtherscan } from "../../services/utils/etherscan-util";
 import { ChainRepository } from "../../../sourcify-chain-repository";
+import { getSession } from "../../services/utils/session-util";
 
 interface VerifyFromJsonInputRequest extends Request {
   params: {
@@ -23,6 +24,7 @@ interface VerifyFromJsonInputRequest extends Request {
     compilerVersion: string;
     contractIdentifier: string;
     creationTransactionHash?: string;
+    privateVerification: boolean;
   };
 }
 
@@ -53,6 +55,11 @@ export async function verifyFromJsonInputEndpoint(
   };
 
   const services = req.app.get("services") as Services;
+  const session = await getSession(req);
+  if (session === null) {
+    throw new Error("Unauthenticated");
+  }
+  const { tenantId } = session.tenantNetworks[0] ?? { tenantId: "" };
   const verificationId =
     await services.verification.verifyFromJsonInputViaWorker(
       req.baseUrl + req.path,
@@ -61,6 +68,10 @@ export async function verifyFromJsonInputEndpoint(
       req.body.stdJsonInput,
       req.body.compilerVersion,
       compilationTarget,
+      {
+        privateVerification: req.body.privateVerification,
+        verifiedBy: tenantId,
+      },
       req.body.creationTransactionHash,
     );
 
@@ -76,6 +87,7 @@ interface VerifyFromMetadataRequest extends Request {
     metadata: Metadata;
     sources: Record<string, string>;
     creationTransactionHash?: string;
+    privateVerification: boolean;
   };
 }
 
@@ -92,6 +104,11 @@ export async function verifyFromMetadataEndpoint(
   });
 
   const services = req.app.get("services") as Services;
+  const session = await getSession(req);
+  if (session === null) {
+    throw new Error("Unauthenticated");
+  }
+  const { tenantId } = session.tenantNetworks[0] ?? { tenantId: "" };
   const verificationId =
     await services.verification.verifyFromMetadataViaWorker(
       req.baseUrl + req.path,
@@ -99,6 +116,10 @@ export async function verifyFromMetadataEndpoint(
       req.params.address,
       req.body.metadata,
       req.body.sources,
+      {
+        privateVerification: req.body.privateVerification,
+        verifiedBy: tenantId,
+      },
       req.body.creationTransactionHash,
     );
 

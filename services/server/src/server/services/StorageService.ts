@@ -26,6 +26,7 @@ import {
   VerificationJob,
   Match,
   VerificationJobId,
+  VerificationParameters,
 } from "../types";
 import {
   RWStorageIdentifiers,
@@ -47,6 +48,7 @@ export interface WStorageService {
   init(): Promise<boolean>;
   storeVerification(
     verification: VerificationExport,
+    verificationParameters?: VerificationParameters,
     jobData?: {
       verificationId: VerificationJobId;
       finishTime: Date;
@@ -310,6 +312,7 @@ export class StorageService {
 
   async storeVerification(
     verification: VerificationExport,
+    verificationParameters?: VerificationParameters,
     jobData?: {
       verificationId: VerificationJobId;
       finishTime: Date;
@@ -348,32 +351,36 @@ export class StorageService {
 
     this.getWriteOrErrServices().forEach((service) => {
       promises.push(
-        service.storeVerification(verification, jobData).catch((e) => {
-          logger.error(`Error storing to ${service.IDENTIFIER}`, {
-            error: e,
-            contractAddress: verification.address,
-            chainId: verification.chainId,
-            runtimeMatch: verification.status.runtimeMatch,
-            creationMatch: verification.status.creationMatch,
-            jobData,
-          });
-          throw e;
-        }),
+        service
+          .storeVerification(verification, verificationParameters, jobData)
+          .catch((e) => {
+            logger.error(`Error storing to ${service.IDENTIFIER}`, {
+              error: e,
+              contractAddress: verification.address,
+              chainId: verification.chainId,
+              runtimeMatch: verification.status.runtimeMatch,
+              creationMatch: verification.status.creationMatch,
+              jobData,
+            });
+            throw e;
+          }),
       );
     });
 
     this.getWriteOrWarnServices().forEach((service) => {
       promises.push(
-        service.storeVerification(verification, jobData).catch((e) => {
-          logger.warn(`Error storing to ${service.IDENTIFIER}`, {
-            error: e,
-            contractAddress: verification.address,
-            chainId: verification.chainId,
-            runtimeMatch: verification.status.runtimeMatch,
-            creationMatch: verification.status.creationMatch,
-            jobData,
-          });
-        }),
+        service
+          .storeVerification(verification, verificationParameters, jobData)
+          .catch((e) => {
+            logger.warn(`Error storing to ${service.IDENTIFIER}`, {
+              error: e,
+              contractAddress: verification.address,
+              chainId: verification.chainId,
+              runtimeMatch: verification.status.runtimeMatch,
+              creationMatch: verification.status.creationMatch,
+              jobData,
+            });
+          }),
       );
     });
 

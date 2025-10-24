@@ -30,6 +30,7 @@ import {
   Match,
   VerificationJobId,
   BytesKeccak,
+  VerificationParameters,
 } from "../../types";
 import Path from "path";
 import {
@@ -584,6 +585,8 @@ export class SourcifyDatabaseService
         address: getAddress(row.address),
         verifiedAt: row.verified_at,
         matchId: row.id,
+        privateVerification: row.private_verification,
+        verifiedBy: row.verified_by,
       }),
     );
 
@@ -754,6 +757,8 @@ export class SourcifyDatabaseService
       chainId: row.chain_id,
       address: getAddress(row.address),
       verifiedAt: row.verified_at,
+      privateVerification: row.private_verification,
+      verifiedBy: row.verified_by,
     }));
 
     return { results };
@@ -942,6 +947,7 @@ export class SourcifyDatabaseService
   async storeVerificationWithPoolClient(
     poolClient: PoolClient,
     verification: VerificationExport,
+    verificationParameters: VerificationParameters,
     jobData?: {
       verificationId: VerificationJobId;
       finishTime: Date;
@@ -949,7 +955,11 @@ export class SourcifyDatabaseService
   ): Promise<{ verifiedContractId: Tables.VerifiedContract["id"] }> {
     try {
       const { type, verifiedContractId, oldVerifiedContractId } =
-        await super.insertOrUpdateVerification(verification, poolClient);
+        await super.insertOrUpdateVerification(
+          verification,
+          verificationParameters,
+          poolClient,
+        );
 
       if (type === "insert") {
         if (!verifiedContractId) {
@@ -1028,6 +1038,7 @@ export class SourcifyDatabaseService
 
   async storeVerification(
     verification: VerificationExport,
+    verificationParameters: VerificationParameters,
     jobData?: {
       verificationId: VerificationJobId;
       finishTime: Date;
@@ -1038,6 +1049,7 @@ export class SourcifyDatabaseService
         return await this.storeVerificationWithPoolClient(
           transactionPoolClient,
           verification,
+          verificationParameters,
           jobData,
         );
       },

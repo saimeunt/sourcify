@@ -44,6 +44,8 @@ export interface VerifiedContractMinimal {
   address: string;
   verifiedAt?: string;
   matchId?: string;
+  privateVerification?: boolean;
+  verifiedBy?: Nullable<string>;
 }
 
 // For displaying contracts in API v2
@@ -244,3 +246,28 @@ export interface Match {
   contractName?: string;
   message?: string;
 }
+
+export type TenantNetwork = {
+  tenantId: string;
+  tenantName: string;
+  rpcUrl: string;
+  chainId: number;
+  displayName: string;
+};
+
+export type Session = {
+  id: string;
+  userId: string;
+  token: string;
+  userAgent: string;
+  ipAddress: string;
+  expiresAt: string;
+  tenantNetworks: TenantNetwork[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type VerificationParameters = {
+  privateVerification: boolean;
+  verifiedBy: Nullable<string>;
+};
