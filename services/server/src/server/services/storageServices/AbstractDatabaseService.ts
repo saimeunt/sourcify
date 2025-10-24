@@ -3,6 +3,7 @@ import * as DatabaseUtil from "../utils/database-util";
 import { bytesFromString, Tables } from "../utils/database-util";
 import { Database, DatabaseOptions } from "../utils/Database";
 import { PoolClient, QueryResult } from "pg";
+import { VerificationParameters } from "../../types";
 
 export default abstract class AbstractDatabaseService {
   public database: Database;
@@ -221,6 +222,7 @@ export default abstract class AbstractDatabaseService {
 
   async insertOrUpdateVerification(
     verification: VerificationExport,
+    verificationParameters: VerificationParameters,
     poolClient: PoolClient,
   ): Promise<{
     type: "update" | "insert";
@@ -232,7 +234,10 @@ export default abstract class AbstractDatabaseService {
     await this.init();
 
     const databaseColumns =
-      await DatabaseUtil.getDatabaseColumnsFromVerification(verification);
+      await DatabaseUtil.getDatabaseColumnsFromVerification(
+        verification,
+        verificationParameters,
+      );
 
     // Get all the verified contracts existing in the DatabaseUtil for these exact onchain bytecodes.
     const existingVerifiedContractResult =

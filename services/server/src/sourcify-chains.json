@@ -1,0 +1,22 @@
+{
+  "42161": {
+    "sourcifyName": "Arbitrum One",
+    "supported": true,
+    "fetchContractCreationTxUsing": {
+      "blockscoutApi": {
+        "url": "https://arbitrum.blockscout.com/"
+      }
+    },
+    "rpc": ["https://arb1.arbitrum.io/rpc"]
+  },
+  "421614": {
+    "sourcifyName": "Arbitrum Sepolia",
+    "supported": true,
+    "fetchContractCreationTxUsing": {
+      "blockscoutApi": {
+        "url": "https://arbitrum-sepolia.blockscout.com/"
+      }
+    },
+    "rpc": ["https://arbitrum-sepolia.drpc.org"]
+  }
+}

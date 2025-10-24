@@ -22,7 +22,7 @@ import {
   getSolcExecutable,
   getSolcJs,
 } from "@ethereum-sourcify/compilers";
-import { VerificationJobId } from "../types";
+import { VerificationJobId, VerificationParameters } from "../types";
 import { StorageService } from "./StorageService";
 import Piscina from "piscina";
 import path from "path";
@@ -273,6 +273,7 @@ export class VerificationService {
     jsonInput: SolidityJsonInput | VyperJsonInput,
     compilerVersion: string,
     compilationTarget: CompilationTarget,
+    verificationParameters: VerificationParameters,
     creationTransactionHash?: string,
   ): Promise<VerificationJobId> {
     const verificationId = await this.storageService.performServiceOperation(
@@ -288,6 +289,7 @@ export class VerificationService {
       compilationTarget,
       creationTransactionHash,
       traceId: asyncLocalStorage.getStore()?.traceId,
+      verificationParameters,
     };
 
     this.verifyViaWorker(verificationId, "verifyFromJsonInput", input);
@@ -301,6 +303,7 @@ export class VerificationService {
     address: string,
     metadata: Metadata,
     sources: Record<string, string>,
+    verificationParameters: VerificationParameters,
     creationTransactionHash?: string,
   ): Promise<VerificationJobId> {
     const verificationId = await this.storageService.performServiceOperation(
@@ -314,6 +317,7 @@ export class VerificationService {
       metadata,
       sources,
       creationTransactionHash,
+      verificationParameters,
       traceId: asyncLocalStorage.getStore()?.traceId,
     };
 
@@ -337,6 +341,7 @@ export class VerificationService {
       chainId,
       address,
       etherscanResult,
+      verificationParameters: { privateVerification: false, verifiedBy: null },
       traceId: asyncLocalStorage.getStore()?.traceId,
     };
 
@@ -366,10 +371,14 @@ export class VerificationService {
         throw new Error(errorMessage);
       })
       .then((verification: VerificationExport) => {
-        return this.storageService.storeVerification(verification, {
-          verificationId,
-          finishTime: new Date(),
-        });
+        return this.storageService.storeVerification(
+          verification,
+          input.verificationParameters,
+          {
+            verificationId,
+            finishTime: new Date(),
+          },
+        );
       })
       .catch((error) => {
         let errorExport: VerifyErrorExport;

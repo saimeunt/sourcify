@@ -8,6 +8,7 @@ import type {
 } from "@ethereum-sourcify/lib-sourcify";
 import { type MatchingErrorResponse } from "../../apiv2/errors";
 import { JobErrorData } from "../utils/database-util";
+import { VerificationParameters } from "../../types";
 
 export interface VerificationWorkerInput {
   traceId?: string;
@@ -19,6 +20,7 @@ export interface VerifyFromJsonInput extends VerificationWorkerInput {
   jsonInput: SolidityJsonInput | VyperJsonInput;
   compilerVersion: string;
   compilationTarget: CompilationTarget;
+  verificationParameters: VerificationParameters;
   creationTransactionHash?: string;
 }
 
@@ -27,6 +29,7 @@ export interface VerifyFromMetadataInput extends VerificationWorkerInput {
   address: string;
   metadata: Metadata;
   sources: Record<string, string>;
+  verificationParameters: VerificationParameters;
   creationTransactionHash?: string;
 }
 
@@ -34,6 +37,7 @@ export interface VerifyFromEtherscanInput extends VerificationWorkerInput {
   chainId: string;
   address: string;
   etherscanResult: EtherscanResult;
+  verificationParameters: VerificationParameters;
 }
 
 export class VerifyError extends Error {

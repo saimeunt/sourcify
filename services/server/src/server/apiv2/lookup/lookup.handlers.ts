@@ -16,6 +16,7 @@ import {
 import { ChainRepository } from "../../../sourcify-chain-repository";
 import { v4 as uuidv4 } from "uuid";
 import { Field } from "../../services/utils/database-util";
+import { getSession } from "../../services/utils/session-util";
 
 interface ListContractsRequest extends Request {
   params: {
@@ -44,17 +45,28 @@ export async function listContractsEndpoint(
   });
   const services = req.app.get("services") as Services;
 
-  const resultsObject = await services.storage.performServiceOperation(
-    "getContractsByChainId",
-    [
+  const [session, resultsObject] = await Promise.all([
+    getSession(req),
+    services.storage.performServiceOperation("getContractsByChainId", [
       req.params.chainId,
       parseInt(req.query.limit || "200"),
       req.query.sort === "desc" || !req.query.sort,
       req.query.afterMatchId,
-    ],
-  );
+    ]),
+  ]);
+  if (session === null) {
+    throw new Error("Unauthenticated");
+  }
+  // filter out private contracts from the results if unauthenticated
+  const { tenantId } = session.tenantNetworks[0] ?? { tenantId: "" };
+  const filteredResults = resultsObject.results.filter((contract) => {
+    if (contract.privateVerification && contract.verifiedBy !== tenantId) {
+      return false;
+    }
+    return true;
+  });
 
-  res.status(StatusCodes.OK).json(resultsObject);
+  res.status(StatusCodes.OK).json({ results: filteredResults });
 }
 
 interface GetContractRequest extends Request {
@@ -86,10 +98,24 @@ export async function getContractEndpoint(
   const fields = req.query.fields?.split(",") as Field[];
   const omit = req.query.omit?.split(",") as Field[];
 
-  const contract = await services.storage.performServiceOperation(
-    "getContract",
-    [req.params.chainId, req.params.address, fields, omit],
-  );
+  const [session, contract] = await Promise.all([
+    getSession(req),
+    services.storage.performServiceOperation("getContract", [
+      req.params.chainId,
+      req.params.address,
+      fields
+        ? [...fields, "privateVerification", "verifiedBy"]
+        : ["privateVerification", "verifiedBy"],
+      omit,
+    ]),
+  ]);
+  if (session === null) {
+    throw new Error("Unauthenticated");
+  }
+  const { tenantId } = session.tenantNetworks[0] ?? { tenantId: "" };
+  if (contract.privateVerification && contract.verifiedBy !== tenantId) {
+    throw new Error("Not allowed");
+  }
 
   if (!contract.match) {
     res.status(StatusCodes.NOT_FOUND).json(contract);
@@ -181,15 +207,29 @@ export async function getContractAllChainsEndpoint(
     address: req.params.address,
   });
   const services = req.app.get("services") as Services;
-  const resultsObject = await services.storage.performServiceOperation(
-    "getContractsAllChains",
-    [req.params.address],
-  );
+  const [session, resultsObject] = await Promise.all([
+    getSession(req),
+    services.storage.performServiceOperation("getContractsAllChains", [
+      req.params.address,
+    ]),
+  ]);
+  if (session === null) {
+    throw new Error("Unauthenticated");
+  }
 
   if (resultsObject.results.length === 0) {
     res.status(StatusCodes.NOT_FOUND).json(resultsObject);
     return;
   }
 
-  res.status(StatusCodes.OK).json(resultsObject);
+  // filter out private contracts from the results if unauthenticated
+  const { tenantId } = session.tenantNetworks[0] ?? { tenantId: "" };
+  const filteredResults = resultsObject.results.filter((contract) => {
+    if (contract.privateVerification && contract.verifiedBy !== tenantId) {
+      return false;
+    }
+    return true;
+  });
+
+  res.status(StatusCodes.OK).json({ results: filteredResults });
 }

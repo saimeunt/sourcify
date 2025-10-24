@@ -5,15 +5,18 @@ import {
 } from "../../../../services/utils/database-util";
 import { SourcifyDatabaseService } from "../../../../services/storageServices/SourcifyDatabaseService";
 import { BadRequestError } from "../../../../../common/errors";
+import { VerificationParameters } from "../../../../types";
 
 export type CustomReplaceMethod = (
   sourcifyDatabaseService: SourcifyDatabaseService,
   verification: VerificationExport,
+  verificationParameters: VerificationParameters,
 ) => Promise<void>;
 
 export const replaceCreationInformation: CustomReplaceMethod = async (
   sourcifyDatabaseService: SourcifyDatabaseService,
   verification: VerificationExport,
+  verificationParameters: VerificationParameters,
 ) => {
   const verificationStatus = verification.status;
   const creationMatch =
@@ -32,8 +35,10 @@ export const replaceCreationInformation: CustomReplaceMethod = async (
   }
 
   // Get database columns from verification
-  const databaseColumns =
-    await getDatabaseColumnsFromVerification(verification);
+  const databaseColumns = await getDatabaseColumnsFromVerification(
+    verification,
+    verificationParameters,
+  );
 
   await sourcifyDatabaseService.withTransaction(async (poolClient) => {
     if (!databaseColumns.onchainCreationCode) {

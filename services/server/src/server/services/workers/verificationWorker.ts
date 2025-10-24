@@ -253,6 +253,7 @@ async function _verifyFromEtherscan({
     jsonInput: compilation.jsonInput,
     compilerVersion: compilation.compilerVersion,
     compilationTarget: compilation.compilationTarget,
+    verificationParameters: { privateVerification: false, verifiedBy: null },
   });
 }
 

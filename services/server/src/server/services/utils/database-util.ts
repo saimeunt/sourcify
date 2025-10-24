@@ -29,6 +29,7 @@ import {
   BytesTypes,
   Nullable,
   SignatureRepresentations,
+  VerificationParameters,
 } from "../../types";
 import { keccak256, JsonFragment } from "ethers";
 import { Database } from "./Database";
@@ -107,6 +108,8 @@ export namespace Tables {
     creation_match: boolean;
     runtime_metadata_match: Nullable<boolean>;
     creation_metadata_match: Nullable<boolean>;
+    private_verification: boolean;
+    verified_by: Nullable<string>;
   }
 
   export interface Sources {
@@ -225,7 +228,8 @@ export type GetSourcifyMatchesAllChainsResult = Pick<
   Tables.SourcifyMatch,
   "id" | "creation_match" | "runtime_match"
 > &
-  Pick<Tables.ContractDeployment, "chain_id"> & {
+  Pick<Tables.ContractDeployment, "chain_id"> &
+  Pick<Tables.VerifiedContract, "private_verification" | "verified_by"> & {
     address: string;
     verified_at: string;
   };
@@ -233,7 +237,11 @@ export type GetSourcifyMatchesAllChainsResult = Pick<
 export type GetSourcifyMatchesByChainResult = Pick<
   Tables.SourcifyMatch,
   "id" | "creation_match" | "runtime_match"
-> & { address: string; verified_at: string };
+> &
+  Pick<Tables.VerifiedContract, "private_verification" | "verified_by"> & {
+    address: string;
+    verified_at: string;
+  };
 
 export type GetSourcifyMatchByChainAddressWithPropertiesResult = Partial<
   Pick<
@@ -259,6 +267,8 @@ export type GetSourcifyMatchByChainAddressWithPropertiesResult = Partial<
       | "creation_values"
       | "runtime_transformations"
       | "runtime_values"
+      | "private_verification"
+      | "verified_by"
     > &
     Pick<
       Tables.ContractDeployment,
@@ -362,6 +372,8 @@ export const STORED_PROPERTIES_TO_SELECTORS = {
     "compiled_contracts.creation_code_artifacts->'cborAuxdata' as creation_cbor_auxdata",
   creation_transformations: "verified_contracts.creation_transformations",
   creation_values: "verified_contracts.creation_values",
+  private_verification: "verified_contracts.private_verification",
+  verified_by: "verified_contracts.verified_by",
   onchain_runtime_code:
     "nullif(concat('0x', encode(onchain_runtime_code.code, 'hex')), '0x') as onchain_runtime_code",
   recompiled_runtime_code:
@@ -539,6 +551,8 @@ export const FIELDS_TO_STORED_PROPERTIES: Record<
     onchainRuntimeBytecode: "onchain_runtime_code",
     onchainCreationBytecode: "onchain_creation_code",
   },
+  privateVerification: "private_verification",
+  verifiedBy: "verified_by",
 };
 
 export type Field =
@@ -652,6 +666,7 @@ function getKeccak256Bytecodes(
 }
 export async function getDatabaseColumnsFromVerification(
   verification: VerificationExport,
+  verificationParameters: VerificationParameters,
 ): Promise<DatabaseColumns> {
   // Normalize both creation and runtime recompiled bytecodes before storing them to the database
   const { normalizedRuntimeBytecode, normalizedCreationBytecode } =
@@ -846,6 +861,8 @@ export async function getDatabaseColumnsFromVerification(
       // We cover also no-metadata case by using match === "perfect"
       runtime_metadata_match,
       creation_metadata_match,
+      private_verification: verificationParameters.privateVerification,
+      verified_by: verificationParameters.verifiedBy,
     },
   };
 }

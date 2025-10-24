@@ -254,6 +254,8 @@ ${
       STORED_PROPERTIES_TO_SELECTORS["address"],
       STORED_PROPERTIES_TO_SELECTORS["chain_id"],
       STORED_PROPERTIES_TO_SELECTORS["verified_at"],
+      STORED_PROPERTIES_TO_SELECTORS["private_verification"],
+      STORED_PROPERTIES_TO_SELECTORS["verified_by"],
     ];
     return await this.pool.query(
       `SELECT 
@@ -418,6 +420,8 @@ ${
       STORED_PROPERTIES_TO_SELECTORS["runtime_match"],
       STORED_PROPERTIES_TO_SELECTORS["address"],
       STORED_PROPERTIES_TO_SELECTORS["verified_at"],
+      STORED_PROPERTIES_TO_SELECTORS["private_verification"],
+      STORED_PROPERTIES_TO_SELECTORS["verified_by"],
     ];
     return await this.pool.query(
       `
@@ -824,6 +828,8 @@ ${
       creation_match,
       runtime_metadata_match,
       creation_metadata_match,
+      private_verification,
+      verified_by,
     }: Omit<Tables.VerifiedContract, "id">,
   ): Promise<QueryResult<Pick<Tables.VerifiedContract, "id">>> {
     let verifiedContractsInsertResult = await poolClient.query(
@@ -837,8 +843,10 @@ ${
         runtime_match,
         creation_match,
         runtime_metadata_match,
-        creation_metadata_match
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+        creation_metadata_match,
+        private_verification,
+        verified_by
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
       [
         compilation_id,
         deployment_id,
@@ -857,6 +865,8 @@ ${
         creation_match,
         runtime_metadata_match,
         creation_metadata_match,
+        private_verification,
+        verified_by,
       ],
     );
     if (verifiedContractsInsertResult.rows.length === 0) {

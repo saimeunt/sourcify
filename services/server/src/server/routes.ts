@@ -2,7 +2,7 @@ import { Router } from "express"; // static is a reserved word
 import logger, { setLogLevel } from "../common/logger";
 import { ChainRepository } from "../sourcify-chain-repository";
 import apiV2Routes from "./apiv2/routes";
-import apiV1Routes from "./apiv1/routes";
+// import apiV1Routes from "./apiv1/routes";
 
 const router: Router = Router();
 
@@ -52,6 +52,6 @@ router.get("/chains", (_req, res) => {
   res.status(200).json(sourcifyChains);
 });
 
-router.use("/", apiV1Routes);
+// router.use("/", apiV1Routes);
 router.use("/v2", apiV2Routes);
 export default router;
