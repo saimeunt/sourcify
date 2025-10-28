@@ -1,6 +1,16 @@
 {
+  "10": {
+    "sourcifyName": "Optimism Mainnet",
+    "supported": true,
+    "fetchContractCreationTxUsing": {
+      "blockscoutApi": {
+        "url": "https://optimism.blockscout.com/"
+      }
+    },
+    "rpc": ["https://mainnet.optimism.io"]
+  },
   "42161": {
-    "sourcifyName": "Arbitrum One",
+    "sourcifyName": "Arbitrum One Mainnet",
     "supported": true,
     "fetchContractCreationTxUsing": {
       "blockscoutApi": {
@@ -8,15 +18,5 @@
       }
     },
     "rpc": ["https://arb1.arbitrum.io/rpc"]
-  },
-  "421614": {
-    "sourcifyName": "Arbitrum Sepolia",
-    "supported": true,
-    "fetchContractCreationTxUsing": {
-      "blockscoutApi": {
-        "url": "https://arbitrum-sepolia.blockscout.com/"
-      }
-    },
-    "rpc": ["https://arbitrum-sepolia.drpc.org"]
   }
 }

@@ -3,6 +3,7 @@ import logger, { setLogLevel } from "../common/logger";
 import { ChainRepository } from "../sourcify-chain-repository";
 import apiV2Routes from "./apiv2/routes";
 // import apiV1Routes from "./apiv1/routes";
+import { getSession } from "./services/utils/session-util";
 
 const router: Router = Router();
 
@@ -26,7 +27,7 @@ router.post("/private/change-log-level", (req, res) => {
   }
 });
 
-router.get("/chains", (_req, res) => {
+router.get("/chains", async (_req, res) => {
   const chainRepository = _req.app.get("chainRepository") as ChainRepository;
   const sourcifyChainsArray = chainRepository.sourcifyChainsArray;
   const sourcifyChains = sourcifyChainsArray.map(
@@ -47,6 +48,23 @@ router.get("/chains", (_req, res) => {
         etherscanAPI: etherscanApi?.supported ?? false, // Needed in the UI
       };
     },
+  );
+
+  const session = await getSession(_req);
+  if (session === null) {
+    throw new Error("Unauthenticated");
+  }
+  const { tenantNetworks } = session;
+  sourcifyChains.unshift(
+    ...tenantNetworks.map((tenantNetwork) => ({
+      name: tenantNetwork.displayName,
+      title: tenantNetwork.displayName,
+      chainId: tenantNetwork.chainId,
+      rpc: [tenantNetwork.rpcUrl],
+      traceSupportedRPCs: [],
+      supported: true,
+      etherscanAPI: false,
+    })),
   );
 
   res.status(200).json(sourcifyChains);
