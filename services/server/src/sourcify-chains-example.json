@@ -12,5 +12,28 @@
       "avalancheApi": true
     },
     "rpc": ["https://ethereum-rpc.publicnode.com"]
+  },
+  "11155420": {
+    "sourcifyName": "OP Sepolia Testnet",
+    "supported": true,
+    "fetchContractCreationTxUsing": {
+      "blockscoutApi": {
+        "url": "https://optimism-sepolia.blockscout.com/"
+      }
+    },
+    "rpc": ["https://sepolia.optimism.io"]
+  },
+  "421614": {
+    "sourcifyName": "Arbitrum Sepolia Testnet",
+    "supported": true,
+    "fetchContractCreationTxUsing": {
+      "blockscoutApi": {
+        "url": "https://arbitrum-sepolia.blockscout.com/"
+      }
+    },
+    "rpc": [
+      "https://sepolia-rollup.arbitrum.io/rpc",
+      "https://arbitrum-sepolia.blockpi.network/v1/rpc/public"
+    ]
   }
 }

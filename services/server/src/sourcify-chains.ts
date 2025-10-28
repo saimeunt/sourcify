@@ -232,11 +232,11 @@ function buildCustomRpcs(
 const sourcifyChainsMap: SourcifyChainMap = {};
 
 // Add test chains too if developing or testing
-if (process.env.NODE_ENV !== "production") {
-  for (const chain of LOCAL_CHAINS) {
-    sourcifyChainsMap[chain.chainId.toString()] = chain;
-  }
-}
+// if (process.env.NODE_ENV !== "production") {
+//   for (const chain of LOCAL_CHAINS) {
+//     sourcifyChainsMap[chain.chainId.toString()] = chain;
+//   }
+// }
 
 // iterate over chainid.network's chains.json file and get the chains included in sourcify-chains.json.
 // Merge the chains.json object with the values from sourcify-chains.json
