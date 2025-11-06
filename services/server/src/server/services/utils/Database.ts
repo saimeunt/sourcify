@@ -317,7 +317,7 @@ ${
     poolClient?: PoolClient,
   ): Promise<QueryResult<Pick<Tables.VerifiedContract, "compilation_id">>> {
     return await (poolClient || this.pool).query(
-      `SELECT compilation_id FROM verified_contracts WHERE id = $1`,
+      `SELECT compilation_id FROM ${this.schema}.verified_contracts WHERE id = $1`,
       [verifiedContractId],
     );
   }
