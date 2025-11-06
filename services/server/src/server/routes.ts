@@ -54,9 +54,8 @@ router.get("/chains", async (_req, res) => {
   if (session === null) {
     throw new Error("Unauthenticated");
   }
-  const { tenantNetworks } = session;
   sourcifyChains.unshift(
-    ...tenantNetworks.map((tenantNetwork) => ({
+    ...session.tenantNetworks.map((tenantNetwork) => ({
       name: tenantNetwork.displayName,
       title: tenantNetwork.displayName,
       chainId: tenantNetwork.chainId,

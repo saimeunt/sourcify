@@ -270,4 +270,5 @@ export type Session = {
 export type VerificationParameters = {
   privateVerification: boolean;
   verifiedBy: Nullable<string>;
+  tenantNetworks: TenantNetwork[];
 };

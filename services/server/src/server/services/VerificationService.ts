@@ -341,7 +341,11 @@ export class VerificationService {
       chainId,
       address,
       etherscanResult,
-      verificationParameters: { privateVerification: false, verifiedBy: null },
+      verificationParameters: {
+        privateVerification: false,
+        verifiedBy: null,
+        tenantNetworks: [],
+      },
       traceId: asyncLocalStorage.getStore()?.traceId,
     };
 

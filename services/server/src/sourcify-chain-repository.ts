@@ -5,14 +5,28 @@ import {
 import { BadRequestError } from "./common/errors/BadRequestError";
 
 export class ChainRepository {
-  readonly sourcifyChainsArray: SourcifyChain[];
+  customChains: SourcifyChain[];
+  // readonly sourcifyChainsArray: SourcifyChain[];
   readonly supportedChainsArray: SourcifyChain[];
   readonly supportedChainMap: SourcifyChainMap;
 
-  constructor(readonly sourcifyChainMap: SourcifyChainMap) {
-    this.sourcifyChainsArray = this._sourcifyChainsArray();
+  constructor(readonly sourcifyChainMapFromJson: SourcifyChainMap) {
+    this.customChains = [];
+    // this.sourcifyChainsArray = this._sourcifyChainsArray();
     this.supportedChainsArray = this._supportedChainsArray();
     this.supportedChainMap = this._supportedChainMap();
+  }
+
+  public get sourcifyChainsArray() {
+    return this._sourcifyChainsArray();
+  }
+
+  public get sourcifyChainMap() {
+    const result = this.sourcifyChainMapFromJson;
+    for (const customChain of this.customChains) {
+      result[customChain.chainId] = customChain;
+    }
+    return result;
   }
 
   // Gets the chainsMap, sorts the chains, returns SourcifyChain array.

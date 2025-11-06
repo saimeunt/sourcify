@@ -17,6 +17,35 @@ import type {
   SolidityJsonInput,
 } from "@ethereum-sourcify/lib-sourcify";
 import type { VyperJsonInput } from "@ethereum-sourcify/lib-sourcify";
+import { getSession } from "../services/utils/session-util";
+import { SourcifyChain } from "@ethereum-sourcify/lib-sourcify";
+
+export async function addCustomChains(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const session = await getSession(req);
+  if (session === null) {
+    throw new Error("Unauthenticated");
+  }
+  const chainRepository = req.app.get("chainRepository") as ChainRepository;
+  chainRepository.customChains = session.tenantNetworks.map(
+    (tenantNetwork) =>
+      new SourcifyChain({
+        name: tenantNetwork.displayName,
+        chainId: tenantNetwork.chainId,
+        rpcs: [
+          {
+            rpc: tenantNetwork.rpcUrl,
+            urlWithoutApiKey: tenantNetwork.rpcUrl,
+          },
+        ],
+        supported: true,
+      }),
+  );
+  next();
+}
 
 export function validateChainId(
   req: Request,
@@ -24,6 +53,10 @@ export function validateChainId(
   next: NextFunction,
 ) {
   const chainRepository = req.app.get("chainRepository") as ChainRepository;
+  const chainIds = chainRepository.customChains.map(({ chainId }) => chainId);
+  if (chainIds.includes(Number(req.params.chainId))) {
+    return next();
+  }
 
   try {
     chainRepository.checkSourcifyChainId(req.params.chainId);

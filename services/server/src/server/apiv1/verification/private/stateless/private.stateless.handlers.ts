@@ -297,6 +297,7 @@ export async function replaceContract(
       await customReplaceMethod(sourcifyDatabaseService, verificationExport, {
         privateVerification: false,
         verifiedBy: null,
+        tenantNetworks: [],
       });
     } catch (error: any) {
       logger.error("Error replacing contract", {
