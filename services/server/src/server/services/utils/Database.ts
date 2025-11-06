@@ -496,7 +496,7 @@ ${
     { bytecode_hash_keccak, bytecode }: Omit<Tables.Code, "bytecode_hash">,
   ): Promise<QueryResult<Pick<Tables.Code, "bytecode_hash">>> {
     let codeInsertResult = await poolClient.query(
-      `INSERT INTO ${this.schema}.code (code_hash, code, code_hash_keccak) VALUES (digest($1::bytea, 'sha256'), $1::bytea, $2) ON CONFLICT (code_hash) DO NOTHING RETURNING code_hash as bytecode_hash`,
+      `INSERT INTO ${this.schema}.code (code_hash, code, code_hash_keccak) VALUES (${this.schema}.digest($1::bytea, 'sha256'), $1::bytea, $2) ON CONFLICT (code_hash) DO NOTHING RETURNING code_hash as bytecode_hash`,
       [bytecode, bytecode_hash_keccak],
     );
 
@@ -506,7 +506,7 @@ ${
         `SELECT
         code_hash as bytecode_hash
       FROM ${this.schema}.code
-      WHERE code_hash = digest($1::bytea, 'sha256')`,
+      WHERE code_hash = ${this.schema}.digest($1::bytea, 'sha256')`,
         [bytecode],
       );
     }
@@ -673,7 +673,7 @@ ${
     sourcesInformation.forEach((sourceCode, sourceCodesQueryIndex) => {
       sourceCodesQueryIndexes.push(
         // `sourceCodesQueryIndex * 2` comes from the number of unique values in the insert query, `sourceCode.content` is used for the first two columns
-        `(digest($${sourceCodesQueryIndex * 2 + 1}, 'sha256'), $${sourceCodesQueryIndex * 2 + 1}, $${sourceCodesQueryIndex * 2 + 2}::bytea)`,
+        `(${this.schema}.digest($${sourceCodesQueryIndex * 2 + 1}, 'sha256'), $${sourceCodesQueryIndex * 2 + 1}, $${sourceCodesQueryIndex * 2 + 2}::bytea)`,
       );
       sourceCodesQueryValues.push(sourceCode.content);
       sourceCodesQueryValues.push(sourceCode.source_hash_keccak);
@@ -744,7 +744,7 @@ ${
       },
     );
 
-    const compiledContractsSourcesQuery = `INSERT INTO compiled_contracts_sources (
+    const compiledContractsSourcesQuery = `INSERT INTO ${this.schema}.compiled_contracts_sources (
     compilation_id,
     source_hash,
     path
