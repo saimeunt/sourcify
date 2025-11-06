@@ -96,6 +96,7 @@ async function _verifyFromJsonInput({
   jsonInput,
   compilerVersion,
   compilationTarget,
+  verificationParameters,
   creationTransactionHash,
 }: VerifyFromJsonInput): Promise<VerifyOutput> {
   let compilation: SolidityCompilation | VyperCompilation | undefined;
@@ -130,6 +131,21 @@ async function _verifyFromJsonInput({
     };
   }
 
+  for (const tenantNetwork of verificationParameters.tenantNetworks) {
+    chainRepository.sourcifyChainMap[tenantNetwork.chainId] = new SourcifyChain(
+      {
+        name: tenantNetwork.displayName,
+        chainId: tenantNetwork.chainId,
+        rpcs: [
+          {
+            rpc: tenantNetwork.rpcUrl,
+            urlWithoutApiKey: tenantNetwork.rpcUrl,
+          },
+        ],
+        supported: true,
+      },
+    );
+  }
   const sourcifyChain = chainRepository.sourcifyChainMap[chainId];
   const foundCreationTxHash =
     creationTransactionHash ||
@@ -253,7 +269,11 @@ async function _verifyFromEtherscan({
     jsonInput: compilation.jsonInput,
     compilerVersion: compilation.compilerVersion,
     compilationTarget: compilation.compilationTarget,
-    verificationParameters: { privateVerification: false, verifiedBy: null },
+    verificationParameters: {
+      privateVerification: false,
+      verifiedBy: null,
+      tenantNetworks: [],
+    },
   });
 }
 

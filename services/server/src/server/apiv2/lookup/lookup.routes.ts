@@ -1,4 +1,5 @@
 import {
+  addCustomChains,
   validateAddress,
   validateChainId,
   validateFieldsAndOmit,
@@ -17,11 +18,14 @@ router
   .route("/contract/all-chains/:address")
   .get(validateAddress, getContractAllChainsEndpoint);
 
-router.route("/contracts/:chainId").get(validateChainId, listContractsEndpoint);
+router
+  .route("/contracts/:chainId")
+  .get(addCustomChains, validateChainId, listContractsEndpoint);
 
 router
   .route("/contract/:chainId/:address")
   .get(
+    addCustomChains,
     validateChainId,
     validateAddress,
     validateFieldsAndOmit,

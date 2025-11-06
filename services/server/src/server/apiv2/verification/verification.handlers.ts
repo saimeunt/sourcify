@@ -71,6 +71,7 @@ export async function verifyFromJsonInputEndpoint(
       {
         privateVerification: req.body.privateVerification,
         verifiedBy: tenantId,
+        tenantNetworks: session.tenantNetworks,
       },
       req.body.creationTransactionHash,
     );
@@ -119,6 +120,7 @@ export async function verifyFromMetadataEndpoint(
       {
         privateVerification: req.body.privateVerification,
         verifiedBy: tenantId,
+        tenantNetworks: session.tenantNetworks,
       },
       req.body.creationTransactionHash,
     );
