@@ -18,9 +18,8 @@ import type {
 } from "@ethereum-sourcify/lib-sourcify";
 import type { VyperJsonInput } from "@ethereum-sourcify/lib-sourcify";
 import { getSession } from "../services/utils/session-util";
-import { SourcifyChain } from "@ethereum-sourcify/lib-sourcify";
 
-export async function addCustomChains(
+export async function validateChainId(
   req: Request,
   res: Response,
   next: NextFunction,
@@ -29,35 +28,13 @@ export async function addCustomChains(
   if (session === null) {
     throw new Error("Unauthenticated");
   }
-  const chainRepository = req.app.get("chainRepository") as ChainRepository;
-  chainRepository.customChains = session.tenantNetworks.map(
-    (tenantNetwork) =>
-      new SourcifyChain({
-        name: tenantNetwork.displayName,
-        chainId: tenantNetwork.chainId,
-        rpcs: [
-          {
-            rpc: tenantNetwork.rpcUrl,
-            urlWithoutApiKey: tenantNetwork.rpcUrl,
-          },
-        ],
-        supported: true,
-      }),
-  );
-  next();
-}
 
-export function validateChainId(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  const chainRepository = req.app.get("chainRepository") as ChainRepository;
-  const chainIds = chainRepository.customChains.map(({ chainId }) => chainId);
+  const chainIds = session.tenantNetworks.map(({ chainId }) => chainId);
   if (chainIds.includes(Number(req.params.chainId))) {
     return next();
   }
 
+  const chainRepository = req.app.get("chainRepository") as ChainRepository;
   try {
     chainRepository.checkSourcifyChainId(req.params.chainId);
   } catch (err: any) {
